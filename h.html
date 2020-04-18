@@ -1,0 +1,86 @@
+<!DOCTYPE html >
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>Creating a Store Locator on Google Maps</title>
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+ </style>
+  </head>
+  <body style="margin:0px; padding:0px;" onload="initJs()">
+    <div>
+         <label for="raddressInput">Search location:</label>
+         <input type="text" id="addressInput" size="15"/>
+        
+        <input type="button" id="searchButton" onclic value="Search"/>
+    </div>
+    <div>
+
+<p id="data"></p>
+</div>
+    
+    <script>
+      var map;
+      var markers = [];
+      var infoWindow;
+      var locationSelect;
+
+
+
+
+       function searchLocations() {
+         var address = document.getElementById("addressInput").value;
+         var geocoder = new google.maps.Geocoder();
+         geocoder.geocode({address: address}, function(results, status) {
+           if (status == google.maps.GeocoderStatus.OK) {
+console.log(results[0].geometry.location);
+            searchLocationsNear(results[0].geometry.location);
+           } else {
+             alert(address + ' not found');
+           }
+         });
+       }
+
+
+
+       async function searchLocationsNear(center) {
+
+         	var searchResponse = await fetch('http://localhost:3000/find_stores?lat=' + center.lat() + '&lng=' + center.lng());
+		var outputData = await searchResponse.json();
+
+
+		document.querySelector('#data').innerText = outputData.storeName;
+         
+       }
+
+        function initJs() {
+   
+
+          searchButton = document.getElementById("searchButton").onclick = searchLocations;
+
+          locationSelect = document.getElementById("locationSelect");
+          locationSelect.onchange = function() {
+            var markerNum = locationSelect.options[locationSelect.selectedIndex].value;
+            if (markerNum != "none"){
+              google.maps.event.trigger(markers[markerNum], 'click');
+            }
+          };
+        }
+
+ 
+  </script>
+ <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEa2fq65PSP4ZlrQCeziBc_mPbrbiTcmU&callback=initMap">
+    </script>
+  </body>
+</html>
